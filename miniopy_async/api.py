@@ -261,11 +261,12 @@ class Minio:  # pylint: disable=too-many-public-methods
             )
 
         if session is None:
-            session = aiohttp.ClientSession()
-            # should_attach_finalizer = True
-        # else:
-            # should_attach_finalizer = False
+            async with aiohttp.ClientSession() as session:
+                return await self._do_req_in_session(session, method, url, body, headers, bucket_name, object_name)
+        else:
+            return await self._do_req_in_session(session, method, url, body, headers, bucket_name, object_name)
 
+    async def _do_req_in_session(self, session, method, url, body, headers, bucket_name, object_name):
         response = await session.request(
             method,
             urlunsplit(url),
